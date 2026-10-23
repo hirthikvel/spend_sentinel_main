@@ -1,19 +1,34 @@
 @import "tailwindcss";
 
 @font-face {
-  font-family: 'Burbank Big Condensed Black';
-  src: url('/fonts/BurbankBigCondensed-Bold.woff') format('woff'),
-       url('/fonts/BurbankBigCondensed-Black.otf') format('opentype');
-  font-weight: 900;
+  font-family: 'PP Neue Montreal';
   font-style: normal;
+  font-weight: 400;
+  src: local('PP Neue Montreal'), url('https://fonts.cdnfonts.com/s/100431/ppneuemontreal-book.woff') format('woff');
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Burbank Big Condensed';
+  font-family: 'PP Neue Montreal';
+  font-style: normal;
+  font-weight: 500;
+  src: local('PP Neue Montreal'), url('https://fonts.cdnfonts.com/s/100431/ppneuemontreal-medium.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Neue Montreal';
+  font-style: normal;
+  font-weight: 700;
+  src: local('PP Neue Montreal'), url('https://fonts.cdnfonts.com/s/100431/ppneuemontreal-bold.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Burbank Big Condensed Black';
   src: url('/fonts/BurbankBigCondensed-Bold.woff') format('woff'),
        url('/fonts/BurbankBigCondensed-Black.otf') format('opentype');
-  font-weight: bold;
+  font-weight: 900;
   font-style: normal;
   font-display: swap;
 }
@@ -26,15 +41,16 @@
   --verdict-red: #FF6B6B;
   --verdict-amber: #FFB547;
   --verdict-green: #4ADE9A;
-  --font-burbank: 'Burbank Big Condensed Black', 'Burbank Big Condensed', 'Impact', sans-serif;
-  --font-serif: 'Playfair Display', Georgia, Cambria, 'Times New Roman', serif;
+  --font-montreal: 'PP Neue Montreal', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-burbank: var(--font-montreal);
+  --font-serif: var(--font-montreal);
   --font-mono: 'JetBrains Mono', monospace;
 }
 
 @theme inline {
   --color-cobalt: #1f5ea5;
   --color-panel: #ffffff;
-  --font-sans: var(--font-burbank);
+  --font-sans: var(--font-montreal);
   --font-serif: var(--font-serif);
   --font-mono: var(--font-mono);
 }
@@ -42,8 +58,8 @@
 body {
   background-color: #1f5ea5;
   color: #0f172a;
-  font-family: var(--font-burbank);
-  letter-spacing: 0.01em;
+  font-family: var(--font-montreal);
+  letter-spacing: -0.01em;
   margin: 0;
   padding: 0;
   overflow: hidden;

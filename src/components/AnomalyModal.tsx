@@ -4,6 +4,9 @@ import React from "react";
 import { AnomalyItem } from "./LatestAnomalies";
 import { EvidenceChip } from "./EvidenceChip";
 import { VerdictBadge } from "./VerdictBadge";
+import { EvidenceAuditModal } from "./EvidenceAuditModal";
+import Link from "next/link";
+import { ArrowRight, Database } from "lucide-react";
 
 interface AnomalyModalProps {
   anomaly: AnomalyItem | null;
@@ -11,6 +14,9 @@ interface AnomalyModalProps {
 }
 
 export function AnomalyModal({ anomaly, onClose }: AnomalyModalProps) {
+  const [auditRef, setAuditRef] = React.useState<string | null>(null);
+  const [auditOpen, setAuditOpen] = React.useState(false);
+
   if (!anomaly) return null;
 
   return (
@@ -59,9 +65,15 @@ export function AnomalyModal({ anomaly, onClose }: AnomalyModalProps) {
               EVIDENCE TAG:
             </span>
             <div className="flex items-center space-x-2">
-              <EvidenceChip id={anomaly.evidenceCode} />
+              <EvidenceChip
+                id={anomaly.evidenceCode || "E1"}
+                onClick={() => {
+                  setAuditRef(anomaly.evidenceCode || "E1");
+                  setAuditOpen(true);
+                }}
+              />
               <span className="text-[10px] font-mono text-neutral-500 uppercase">
-                VERIFIED TELEMETRY CHIP
+                CLICK TO AUDIT SQL PROOF
               </span>
             </div>
           </div>
@@ -78,23 +90,46 @@ export function AnomalyModal({ anomaly, onClose }: AnomalyModalProps) {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end space-x-3 pt-2">
+        <div className="flex items-center justify-between pt-2 border-t border-neutral-200">
           <button
             type="button"
-            onClick={onClose}
-            className="px-4 py-2 border border-neutral-300 text-xs font-black uppercase tracking-wider text-black hover:bg-neutral-100 transition-colors"
+            onClick={() => {
+              setAuditRef(anomaly.evidenceCode || "E1");
+              setAuditOpen(true);
+            }}
+            className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded text-xs font-mono font-bold flex items-center space-x-1.5 transition-colors cursor-pointer"
           >
-            DISMISS
+            <Database className="w-3.5 h-3.5" />
+            <span>Audit SQL Proof</span>
           </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 bg-[#1f5ea5] text-white text-xs font-black uppercase tracking-wider hover:bg-[#184980] transition-colors shadow-xs"
-          >
-            APPLY REMEDIATION
-          </button>
+
+          <div className="flex items-center space-x-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-3 py-2 border border-neutral-300 text-xs font-black uppercase tracking-wider text-black hover:bg-neutral-100 transition-colors"
+            >
+              DISMISS
+            </button>
+            <Link
+              href={`/anomalies/${anomaly.id}`}
+              onClick={onClose}
+              className="px-4 py-2 bg-[#1f5ea5] hover:bg-[#184980] text-white text-xs font-black uppercase tracking-wider transition-colors shadow-xs flex items-center space-x-1.5"
+            >
+              <span>Drill Into Finding</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
         </div>
       </div>
+
+      {/* Embedded Evidence Audit Modal */}
+      <EvidenceAuditModal
+        isOpen={auditOpen}
+        onClose={() => setAuditOpen(false)}
+        evidenceRef={auditRef}
+        anomalyId={anomaly.id}
+      />
     </div>
   );
 }

@@ -55,7 +55,7 @@ export function LatestAnomalies({
   anomalies,
   onSelectAnomaly,
 }: LatestAnomaliesProps) {
-  const items = anomalies && anomalies.length > 0 ? anomalies : ANOMALIES_DATA;
+  const items = anomalies !== undefined ? anomalies : [];
 
   return (
     <div className="panel-card bg-white p-3.5 2xl:p-4.5 select-none h-[185px] 2xl:h-[210px] flex flex-col justify-between">
@@ -69,8 +69,18 @@ export function LatestAnomalies({
         </span>
       </div>
 
-      {/* 3 List Rows */}
-      <div className="space-y-2.5 pt-1">
+      {/* 3 List Rows or Empty State */}
+      {items.length === 0 ? (
+        <div className="flex-1 flex flex-col items-center justify-center text-center p-2">
+          <p className="text-sm font-black uppercase text-neutral-800 tracking-wider font-sans">
+            No Anomalies Detected
+          </p>
+          <p className="text-xs text-neutral-500 font-sans mt-0.5 font-medium">
+            All cloud spend is running within baseline parameters.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-2.5 pt-1">
         {items.slice(0, 3).map((item) => (
           <div
             key={item.id}
@@ -97,7 +107,8 @@ export function LatestAnomalies({
             </div>
           </div>
         ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

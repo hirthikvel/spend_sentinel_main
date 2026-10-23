@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { SerratedStripes } from "@/components/SerratedStripes";
 import { Sidebar } from "@/components/Sidebar";
@@ -9,6 +9,9 @@ import { SearchPalette } from "@/components/SearchPalette";
 import { VerdictBadge, VerdictType } from "@/components/VerdictBadge";
 import { AnomalyModal } from "@/components/AnomalyModal";
 import { AnomalyItem } from "@/components/LatestAnomalies";
+import { fetchAnomaliesFromSupabase } from "@/lib/supabase";
+import { useAuthGuard } from "@/lib/useAuthGuard";
+import { motion } from "motion/react";
 
 interface AnomalyRowData {
   id: string;
@@ -29,6 +32,7 @@ interface AnomalyRowData {
 }
 
 export default function AnomaliesPage() {
+  const { isLoading: authLoading } = useAuthGuard();
   const router = useRouter();
   const [currentMenu, setCurrentMenu] = useState("ANOMALIES");
   const [selectedRange, setSelectedRange] = useState("LAST 60 DAYS");
@@ -37,17 +41,17 @@ export default function AnomaliesPage() {
   >("All");
   const [searchOpen, setSearchOpen] = useState(false);
   const [selectedAnomaly, setSelectedAnomaly] = useState<AnomalyItem | null>(null);
-  const [hoveredRowId, setHoveredRowId] = useState<string>("anom-ec2-2"); // Row 2 hovered by default as specified
+  const [hoveredRowId, setHoveredRowId] = useState<string>("anom-ec2-2");
 
-  const anomaliesList: AnomalyRowData[] = [
+  const defaultAnomalies: AnomalyRowData[] = [
     {
-      id: "anom-vpc-1",
-      date: "Oct 12",
-      service: "Amazon VPC",
-      region: "us-east-1",
-      expected: "$23",
-      observed: "$221",
-      delta: "+$198",
+      id: "anom-rds-1",
+      date: "Aug 15",
+      service: "Amazon RDS",
+      region: "ap-south-1",
+      expected: "₹7,399",
+      observed: "₹25,288",
+      delta: "+₹17,888",
       severity: "High",
       verdict: "MISCONFIGURATION",
       confidence: 88,
@@ -55,44 +59,71 @@ export default function AnomaliesPage() {
       borderColor: "#FF6B6B",
       evidenceChip: "E3",
       rootCause:
-        "NAT Gateway cross-AZ data transfer loop configured without VPC gateway endpoints",
+        "RDS-Primary connection spike causing unindexed multi-AZ read replica overload",
     },
     {
-      id: "anom-ec2-2",
-      date: "Oct 15",
-      service: "Amazon EC2",
-      region: "us-west-2",
-      expected: "$29",
-      observed: "$314",
-      delta: "+$285",
+      id: "anom-lambda-2",
+      date: "Oct 18",
+      service: "AWS Lambda",
+      region: "ap-south-1",
+      expected: "₹1,979",
+      observed: "₹11,220",
+      delta: "+₹9,241",
       severity: "High",
-      verdict: "FORGOTTEN ENVIRONMENT",
-      confidence: 81,
+      verdict: "MISCONFIGURATION",
+      confidence: 88,
       status: "Open",
       borderColor: "#FFB547",
       isHoveredDefault: true,
       evidenceChip: "E5",
       rootCause:
-        "Orphaned GPU dev training cluster running 24/7 with zero active CPU/network utilization",
+        "Recursive invocation loop in Lambda-Processing runaway processing compute",
     },
     {
       id: "anom-ec2-3",
-      date: "Oct 18",
+      date: "Oct 22",
       service: "Amazon EC2",
-      region: "us-east-1",
-      expected: "$512",
-      observed: "$692",
-      delta: "+$180",
+      region: "ap-south-1",
+      expected: "₹43,520",
+      observed: "₹58,820",
+      delta: "+₹15,300",
       severity: "Medium",
       verdict: "HEALTHY GROWTH",
-      confidence: 74,
+      confidence: 78,
       status: "Open",
       borderColor: "#4ADE9A",
       evidenceChip: "E1",
       rootCause:
-        "Q4 customer load expansion causing autoscaling group surge backed by verified revenue",
+        "Customer traffic expansion causing production API autoscaling group surge backed by verified revenue",
     },
   ];
+
+  const [anomaliesList, setAnomaliesList] = useState<AnomalyRowData[]>(defaultAnomalies);
+
+  useEffect(() => {
+    fetchAnomaliesFromSupabase().then((items) => {
+      if (items && items.length > 0) {
+        setAnomaliesList(
+          items.map((item, idx) => ({
+            id: item.id,
+            date: item.date || `Oct ${12 + idx * 3}`,
+            service: item.service,
+            region: item.region.toLowerCase(),
+            expected: item.expectedCost || "₹2,465",
+            observed: item.observedCost || "₹26,690",
+            delta: item.delta,
+            severity: item.confidence > 85 ? "High" : "Medium",
+            verdict: item.verdict,
+            confidence: item.confidence,
+            status: (item.status as any) || "Open",
+            borderColor: item.dotColor,
+            evidenceChip: item.evidenceCode,
+            rootCause: item.description,
+          }))
+        );
+      }
+    });
+  }, []);
 
   const filteredAnomalies = anomaliesList.filter((item) => {
     if (selectedFilter === "All") return true;
@@ -101,6 +132,23 @@ export default function AnomaliesPage() {
     if (selectedFilter === "Growth") return item.verdict === "HEALTHY GROWTH";
     return true;
   });
+
+  if (authLoading) {
+    return (
+      <main
+        className="fixed inset-0 w-screen h-screen bg-[#1f5ea5] overflow-hidden flex items-center justify-center font-sans"
+        style={{ backgroundColor: "#1f5ea5" }}
+      >
+        <SerratedStripes />
+        <div className="relative z-10 panel-card bg-white p-8 flex flex-col items-center space-y-4 shadow-2xl">
+          <div className="w-10 h-10 border-4 border-[#1f5ea5] border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm font-black uppercase tracking-wider text-black font-sans">
+            AUTHENTICATING ACCESS...
+          </p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main

@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 
+import { useRouter } from "next/navigation";
+
 interface SearchPaletteProps {
   isOpen: boolean;
   onClose: () => void;
@@ -9,18 +11,15 @@ interface SearchPaletteProps {
 }
 
 const SEARCH_ITEMS = [
-  { category: "SERVICE", title: "EC2 US-WEST-2", subtitle: "Active cost anomaly +$285" },
-  { category: "SERVICE", title: "VPC US-EAST-1", subtitle: "NAT Gateway misconfiguration +$198" },
-  { category: "SERVICE", title: "EC2 US-EAST-1", subtitle: "Autoscaling group healthy growth +$180" },
-  { category: "RESOURCE", title: "I-STG-GPU-01", subtitle: "Idle p3.2xlarge ($2,850/mo potential savings)" },
-  { category: "RESOURCE", title: "RDS-ANALYTICS-OLD", subtitle: "Over-provisioned db.m5.4xlarge ($1,920/mo)" },
-  { category: "RESOURCE", title: "I-API-03", subtitle: "Staging API instance ($780/mo potential savings)" },
-  { category: "ACTION", title: "DOWNLOAD SPEND AUDIT CSV", subtitle: "Export 60-day telemetry report" },
-  { category: "PAGE", title: "NAVIGATE TO ANOMALIES", subtitle: "View all detected anomalies" },
-  { category: "PAGE", title: "NAVIGATE TO SAVINGS", subtitle: "View 3 optimization recommendations" },
+  { category: "PAGE", title: "DASHBOARD", subtitle: "Live Cloud Spend & Baseline Trajectory", route: "/dashboard" },
+  { category: "PAGE", title: "ANOMALIES", subtitle: "Detected Inefficiencies & Evidence Cards", route: "/anomalies" },
+  { category: "ACTION", title: "UPLOAD BILLING CSV", subtitle: "Ingest FOCUS Standard or AWS CUR CSV", route: "/upload" },
+  { category: "PAGE", title: "ACCOUNT DETAILS", subtitle: "Profile, Organization Type & Security", route: "/account" },
+  { category: "PAGE", title: "ORGANIZATION SETTINGS", subtitle: "Member Access & RBAC Controls", route: "/settings" },
 ];
 
 export function SearchPalette({ isOpen, onClose, onSelectResult }: SearchPaletteProps) {
+  const router = useRouter();
   const [query, setQuery] = useState("");
 
   useEffect(() => {
@@ -94,6 +93,7 @@ export function SearchPalette({ isOpen, onClose, onSelectResult }: SearchPalette
                 type="button"
                 onClick={() => {
                   onSelectResult?.(item.title);
+                  if (item.route) router.push(item.route);
                   onClose();
                 }}
                 className="w-full text-left p-3 hover:bg-neutral-50 rounded flex items-center justify-between group transition-colors"

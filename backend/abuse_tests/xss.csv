@@ -1,0 +1,2 @@
+usage_date,service,region,cost,resource_id,usage_type,usage_quantity,account_id,tag_env,tag_team
+2026-10-01,<img src=x onerror=alert(1)>,us-east-1,100,i-123,type,1,acc,prod,team

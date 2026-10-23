@@ -149,20 +149,41 @@ export function DailySpendChart({
         <h3 className="text-xl 2xl:text-2xl font-black tracking-wider text-black uppercase font-sans leading-none">
           DAILY SPEND
         </h3>
+        {chartPoints && chartPoints.length > 0 && (
+          <span className="text-[11px] font-mono font-bold text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded border border-neutral-200 uppercase">
+            {chartPoints.length} DATES SCANNED FROM CSV
+          </span>
+        )}
       </div>
 
-      {/* Line Chart Area */}
-      <div className="relative w-full h-[165px] 2xl:h-[190px] mt-1">
-        <svg
-          viewBox="0 0 950 160"
-          className="w-full h-full overflow-visible"
-          preserveAspectRatio="none"
-        >
-          {/* Faint Horizontal Grid Lines */}
-          <line x1="10" y1="36" x2="940" y2="36" stroke="#e5e7eb" strokeWidth="1" />
-          <line x1="10" y1="72" x2="940" y2="72" stroke="#e5e7eb" strokeWidth="1" />
-          <line x1="10" y1="108" x2="940" y2="108" stroke="#e5e7eb" strokeWidth="1" />
-          <line x1="10" y1="144" x2="940" y2="144" stroke="#e5e7eb" strokeWidth="1" />
+      {chartPoints !== undefined && chartPoints.length === 0 ? (
+        <div className="relative w-full h-[165px] 2xl:h-[190px] mt-1 flex flex-col items-center justify-center border-2 border-dashed border-neutral-300 rounded bg-neutral-50/80 p-4 text-center">
+          <p className="text-sm font-black uppercase text-neutral-800 tracking-wider font-sans mb-1">
+            No Billing CSV Data Ingested Yet
+          </p>
+          <p className="text-xs text-neutral-500 font-sans max-w-md mb-3 font-medium">
+            Daily spend graph is strictly generated from uploaded CSV billing records and scanned dates.
+          </p>
+          <a
+            href="/upload"
+            className="px-4 py-1.5 bg-[#1f5ea5] hover:bg-[#184980] text-white text-xs font-black uppercase tracking-wider rounded font-sans transition-colors shadow-xs"
+          >
+            Upload Billing CSV
+          </a>
+        </div>
+      ) : (
+        /* Line Chart Area */
+        <div className="relative w-full h-[165px] 2xl:h-[190px] mt-1">
+          <svg
+            viewBox="0 0 950 160"
+            className="w-full h-full overflow-visible"
+            preserveAspectRatio="none"
+          >
+            {/* Faint Horizontal Grid Lines */}
+            <line x1="10" y1="36" x2="940" y2="36" stroke="#e5e7eb" strokeWidth="1" />
+            <line x1="10" y1="72" x2="940" y2="72" stroke="#e5e7eb" strokeWidth="1" />
+            <line x1="10" y1="108" x2="940" y2="108" stroke="#e5e7eb" strokeWidth="1" />
+            <line x1="10" y1="144" x2="940" y2="144" stroke="#e5e7eb" strokeWidth="1" />
 
           {/* Vertical Faint Bands behind dots */}
           {anomalyDots.map((dot) => (
@@ -172,13 +193,7 @@ export function DailySpendChart({
               y="28"
               width={dot.bandW}
               height="116"
-              fill={
-                dot.id === "anom-1"
-                  ? "rgba(200, 90, 75, 0.16)"
-                  : dot.id === "anom-2"
-                  ? "rgba(217, 151, 56, 0.18)"
-                  : "rgba(96, 163, 119, 0.18)"
-              }
+              fill={dot.color ? `${dot.color}2e` : "rgba(200, 90, 75, 0.16)"}
               rx="2"
             />
           ))}
@@ -234,6 +249,7 @@ export function DailySpendChart({
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }

@@ -1,17 +1,18 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { getCurrentUserOrganization, supabase } from "@/lib/supabase";
 
 interface SidebarProps {
   currentMenu?: string;
   onSelectMenu?: (menu: string) => void;
+  organizationName?: string;
 }
 
 const MENU_ITEMS = [
   "DASHBOARD",
   "ANOMALIES",
-  "SAVINGS",
   "ASK",
   "UPLOAD",
   "SETTINGS",
@@ -20,8 +21,29 @@ const MENU_ITEMS = [
 export function Sidebar({
   currentMenu = "DASHBOARD",
   onSelectMenu,
+  organizationName,
 }: SidebarProps) {
   const router = useRouter();
+  const [activeOrgName, setActiveOrgName] = useState<string>("ORGANIZATION");
+
+  useEffect(() => {
+    async function updateOrg() {
+      const res = await getCurrentUserOrganization();
+      if (res?.orgName) {
+        setActiveOrgName(res.orgName);
+      }
+    }
+    updateOrg();
+
+    if (supabase) {
+      const { data } = supabase.auth.onAuthStateChange(() => {
+        updateOrg();
+      });
+      return () => {
+        data.subscription.unsubscribe();
+      };
+    }
+  }, []);
 
   const handleMenuClick = (item: string) => {
     if (onSelectMenu) {
@@ -33,15 +55,13 @@ export function Sidebar({
       router.push("/anomalies/oct-15");
     } else if (item === "UPLOAD") {
       router.push("/upload");
-    } else if (item === "SAVINGS") {
-      router.push("/dashboard");
     } else if (item === "ASK") {
       // Dispatches open search event for Ctrl+K
       window.dispatchEvent(
         new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true })
       );
     } else if (item === "SETTINGS") {
-      router.push("/create-organization");
+      router.push("/settings");
     }
   };
 
@@ -53,8 +73,8 @@ export function Sidebar({
           <h1 className="text-2xl 2xl:text-[28px] font-black tracking-tight text-black uppercase leading-none font-sans">
             SPENDSENTINEL
           </h1>
-          <p className="text-xs 2xl:text-sm font-black tracking-wider text-black uppercase mt-1 font-sans">
-            NORTHWIND LABS
+          <p className="text-xs 2xl:text-sm font-black tracking-wider text-black uppercase mt-1 font-sans truncate">
+            {organizationName || activeOrgName}
           </p>
         </div>
 
@@ -96,17 +116,32 @@ export function Sidebar({
         </nav>
       </div>
 
-      {/* Bottom User Avatar Box */}
-      <div className="pt-4">
+      {/* Bottom Account Details Button */}
+      <div className="pt-3 border-t border-neutral-100">
         <button
           type="button"
           onClick={() => {
-            router.push("/signin");
+            onSelectMenu?.("ACCOUNT");
+            router.push("/account");
           }}
-          className="w-10 h-10 2xl:w-11 2xl:h-11 rounded-sm border-2 border-neutral-300 bg-neutral-100 flex items-center justify-center font-black text-sm 2xl:text-base text-neutral-800 shadow-xs cursor-pointer hover:border-black hover:bg-neutral-200 transition-colors font-sans"
-          title="Sign Out (M)"
+          className={`w-full py-2 px-2.5 rounded-sm border-2 transition-all cursor-pointer font-sans shadow-xs flex items-center space-x-2 ${
+            currentMenu === "ACCOUNT"
+              ? "border-[#1f5ea5] bg-blue-50/70"
+              : "border-neutral-300 bg-neutral-50 hover:bg-neutral-100 hover:border-black"
+          }`}
+          title="Account Details"
         >
-          M
+          <div className="w-7 h-7 rounded-full bg-[#1f5ea5] text-white flex items-center justify-center font-black text-xs shrink-0">
+            A
+          </div>
+          <div className="flex flex-col text-left overflow-hidden">
+            <span className="text-xs font-black uppercase tracking-wider text-black leading-tight truncate">
+              Account Details
+            </span>
+            <span className="text-[10px] font-mono font-bold text-neutral-400 leading-tight truncate">
+              Profile & Access
+            </span>
+          </div>
         </button>
       </div>
     </aside>

@@ -4,15 +4,29 @@ import React, { useState } from "react";
 
 interface HeaderRowProps {
   onFilterChange?: (filterCategory: string, value: string) => void;
+  availableServices?: string[];
+  availableRegions?: string[];
+  availableEnvironments?: string[];
 }
 
-export function HeaderRow({ onFilterChange }: HeaderRowProps) {
+export function HeaderRow({
+  onFilterChange,
+  availableServices,
+  availableRegions,
+  availableEnvironments,
+}: HeaderRowProps) {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
   const filterOptions: Record<string, string[]> = {
-    "ALL SERVICES": ["ALL SERVICES", "EC2", "RDS", "VPC", "S3", "EKS", "LAMBDA"],
-    "ALL REGIONS": ["ALL REGIONS", "US-EAST-1", "US-WEST-2", "EU-WEST-1", "AP-SOUTHEAST-1"],
-    "ALL ENVIRONMENTS": ["ALL ENVIRONMENTS", "PRODUCTION", "STAGING", "DEV", "TEST"],
+    "ALL SERVICES": availableServices && availableServices.length > 0
+      ? availableServices
+      : ["ALL SERVICES", "EC2", "RDS", "VPC"],
+    "ALL REGIONS": availableRegions && availableRegions.length > 0
+      ? availableRegions
+      : ["ALL REGIONS", "US-EAST-1", "US-WEST-2"],
+    "ALL ENVIRONMENTS": availableEnvironments && availableEnvironments.length > 0
+      ? availableEnvironments
+      : ["ALL ENVIRONMENTS", "PRODUCTION", "STAGING"],
   };
 
   const [selectedValues, setSelectedValues] = useState<Record<string, string>>({

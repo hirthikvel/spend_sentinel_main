@@ -17,8 +17,12 @@ import {
   SavingsItem,
 } from "@/lib/types";
 import { getFilteredDashboardData } from "@/lib/mock-data";
+import { useAuthGuard } from "@/lib/useAuthGuard";
+import { supabase } from "@/lib/supabase";
+import { motion } from "motion/react";
 
 export default function SpendSentinelDashboard() {
+  const { isLoading: authLoading } = useAuthGuard();
   const [currentMenu, setCurrentMenu] = useState("DASHBOARD");
   const [selectedRange, setSelectedRange] = useState("LAST 60 DAYS");
   const [selectedService, setSelectedService] = useState("ALL SERVICES");
@@ -35,15 +39,27 @@ export default function SpendSentinelDashboard() {
     return match ? parseInt(match[0], 10) : 60;
   }, [selectedRange]);
 
-  // Real-time backend data state
-  const [dashboardData, setDashboardData] = useState<DashboardPayload>(() =>
-    getFilteredDashboardData({
-      days: 60,
-      service: "ALL SERVICES",
-      region: "ALL REGIONS",
-      environment: "ALL ENVIRONMENTS",
-    })
-  );
+  // Real-time backend data state initialized to real zero state
+  const [dashboardData, setDashboardData] = useState<DashboardPayload>({
+    kpis: {
+      spendTotal: "$0",
+      spendGrowthPill: "0%",
+      openAnomaliesCount: 0,
+      openAnomaliesPill: "0 HIGH",
+      idleResourcesCount: 0,
+      idleResourcesPill: "CLEAN",
+      monthlySavingTotal: "$0",
+      monthlySavingPill: "SAVINGS",
+    },
+    chartPoints: [],
+    anomalies: [],
+    savings: [],
+    activeRangeLabel: "LAST 60 DAYS",
+    isLiveFromSupabase: true,
+    availableServices: ["ALL SERVICES"],
+    availableRegions: ["ALL REGIONS"],
+    availableEnvironments: ["ALL ENVIRONMENTS"],
+  });
   const [isLoading, setIsLoading] = useState(false);
 
   // Fetch from backend API route (/api/spend-pulse) whenever filters change
@@ -63,14 +79,7 @@ export default function SpendSentinelDashboard() {
         setDashboardData(json);
       }
     } catch (err) {
-      console.warn("Backend fetch failed, using fallback engine:", err);
-      const localData = getFilteredDashboardData({
-        days: daysNumber,
-        service: selectedService,
-        region: selectedRegion,
-        environment: selectedEnvironment,
-      });
-      setDashboardData(localData);
+      console.warn("Backend fetch failed:", err);
     } finally {
       setIsLoading(false);
     }
@@ -78,6 +87,48 @@ export default function SpendSentinelDashboard() {
 
   useEffect(() => {
     fetchDashboardData();
+  }, [fetchDashboardData]);
+
+  // Realtime Supabase Subscription: frontend automatically refreshes when any backend table updates
+  useEffect(() => {
+    const client = supabase;
+    if (!client) return;
+
+    const channel = client
+      .channel("dashboard-realtime-feed")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "anomalies" },
+        () => {
+          fetchDashboardData();
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "idle_resources" },
+        () => {
+          fetchDashboardData();
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "billing_line_items" },
+        () => {
+          fetchDashboardData();
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "billing_uploads" },
+        () => {
+          fetchDashboardData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      client.removeChannel(channel);
+    };
   }, [fetchDashboardData]);
 
   const handleFilterChange = (category: string, value: string) => {
@@ -94,6 +145,23 @@ export default function SpendSentinelDashboard() {
       setSelectedAnomaly(dashboardData.anomalies[0]);
     }
   };
+
+  if (authLoading) {
+    return (
+      <main
+        className="fixed inset-0 w-screen h-screen bg-[#1f5ea5] overflow-hidden flex items-center justify-center font-sans"
+        style={{ backgroundColor: "#1f5ea5" }}
+      >
+        <SerratedStripes />
+        <div className="relative z-10 panel-card bg-white p-8 flex flex-col items-center space-y-4 shadow-2xl">
+          <div className="w-10 h-10 border-4 border-[#1f5ea5] border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm font-black uppercase tracking-wider text-black font-sans">
+            AUTHENTICATING ACCESS...
+          </p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main
@@ -119,7 +187,12 @@ export default function SpendSentinelDashboard() {
         />
 
         {/* Main Content Area (Stretching to fill 100% of remaining screen with tight gaps) */}
-        <div className="flex-1 h-full flex flex-col justify-between gap-1.5 2xl:gap-2 overflow-hidden">
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: "easeOut" }}
+          className="flex-1 h-full flex flex-col justify-between gap-1.5 2xl:gap-2 overflow-hidden"
+        >
           {/* Top Bar */}
           <TopBar
             onOpenSearch={() => setSearchOpen(true)}
@@ -127,8 +200,13 @@ export default function SpendSentinelDashboard() {
             onRangeChange={(range) => setSelectedRange(range)}
           />
 
-          {/* Row 1: Page Title 'SPEND PULSE' & Filter Pills */}
-          <HeaderRow onFilterChange={handleFilterChange} />
+          {/* Row 1: Page Title 'SPEND PULSE' & Filter Pills strictly from Supabase backend */}
+          <HeaderRow
+            onFilterChange={handleFilterChange}
+            availableServices={dashboardData.availableServices}
+            availableRegions={dashboardData.availableRegions}
+            availableEnvironments={dashboardData.availableEnvironments}
+          />
 
           {/* Row 2: Four KPI Cards */}
           <KpiCardsRow
@@ -159,7 +237,7 @@ export default function SpendSentinelDashboard() {
               onSelectSavings={(save) => setSelectedSavings(save)}
             />
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Interactive Deep Dive Anomaly Modal */}
