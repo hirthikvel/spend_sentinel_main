@@ -15,6 +15,7 @@ import {
 } from "@/lib/supabase";
 import { OrgMember } from "@/lib/types";
 import { Users, Upload, Trash2, CheckCircle2, AlertCircle, FileText } from "lucide-react";
+import { motion } from "motion/react";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -191,13 +192,15 @@ export default function SettingsPage() {
 
       <div className="relative z-10 w-full h-full flex gap-2.5 2xl:gap-3 overflow-hidden">
         {/* Sidebar */}
-        <Sidebar
-          currentMenu={currentMenu}
-          onSelectMenu={(menu) => setCurrentMenu(menu)}
-        />
+        <Sidebar />
 
         {/* Main Content */}
-        <div className="flex-1 h-full flex flex-col justify-between gap-2 2xl:gap-2.5 overflow-hidden">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+          className="flex-1 h-full flex flex-col justify-between gap-2 2xl:gap-2.5 overflow-hidden"
+        >
           <TopBar
             onOpenSearch={() => setSearchOpen(true)}
             selectedRange={selectedRange}
@@ -478,7 +481,7 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       <SearchPalette

@@ -161,18 +161,15 @@ export default function AnomaliesPage() {
       {/* Main Full-Screen Layout */}
       <div className="relative z-10 w-full h-full flex gap-2.5 2xl:gap-3 overflow-hidden">
         {/* Left Sidebar */}
-        <Sidebar
-          currentMenu={currentMenu}
-          onSelectMenu={(menu) => {
-            setCurrentMenu(menu);
-            if (menu === "DASHBOARD") router.push("/dashboard");
-            if (menu === "UPLOAD") router.push("/upload");
-            if (menu === "ANOMALIES") router.push("/anomalies/oct-15");
-          }}
-        />
+        <Sidebar />
 
         {/* Main Content Area */}
-        <div className="flex-1 h-full flex flex-col justify-between gap-2 2xl:gap-2.5 overflow-hidden">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+          className="flex-1 h-full flex flex-col justify-between gap-2 2xl:gap-2.5 overflow-hidden"
+        >
           {/* Top Bar */}
           <TopBar
             onOpenSearch={() => setSearchOpen(true)}
@@ -358,7 +355,7 @@ export default function AnomaliesPage() {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Interactive Anomaly Detail Modal */}

@@ -181,10 +181,7 @@ export default function SpendSentinelDashboard() {
       {/* Main Full-Screen Layout: Tightened gaps, zoomed bold fonts */}
       <div className="relative z-10 w-full h-full flex gap-2.5 2xl:gap-3 overflow-hidden">
         {/* Left Sidebar */}
-        <Sidebar
-          currentMenu={currentMenu}
-          onSelectMenu={(menu) => setCurrentMenu(menu)}
-        />
+        <Sidebar />
 
         {/* Main Content Area (Stretching to fill 100% of remaining screen with tight gaps) */}
         <motion.div
