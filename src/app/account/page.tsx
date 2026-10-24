@@ -17,6 +17,7 @@ import {
   resetAllBillingData,
 } from "@/lib/supabase";
 import { OrganizationType, ORGANIZATION_TYPES } from "@/lib/types";
+import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
 import { motion } from "motion/react";
 import {
   User,
@@ -429,18 +430,8 @@ export default function AccountPage() {
                         />
                       </div>
 
-                      {/* Password strength bar */}
-                      <div className="space-y-1 pt-1">
-                        <div className="flex space-x-1.5 h-1.5 w-full">
-                          <div className="w-1/4 h-full rounded-full bg-amber-400" />
-                          <div className="w-1/4 h-full rounded-full bg-neutral-200" />
-                          <div className="w-1/4 h-full rounded-full bg-neutral-200" />
-                          <div className="w-1/4 h-full rounded-full bg-neutral-200" />
-                        </div>
-                        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-neutral-400">
-                          12 CHARACTERS OR MORE RECOMMENDED
-                        </span>
-                      </div>
+                      {/* Password strength bar dynamically connected to newPassword */}
+                      <PasswordStrengthIndicator password={newPassword} />
 
                       <button
                         type="submit"

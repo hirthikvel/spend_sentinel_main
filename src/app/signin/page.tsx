@@ -6,6 +6,7 @@ import { SerratedStripes } from "@/components/SerratedStripes";
 import { Eye, EyeOff, Lock, ArrowRight, CheckCircle2, AlertCircle } from "lucide-react";
 import { signInWithSupabase, signUpWithSupabase, supabase } from "@/lib/supabase";
 import { OrganizationType, ORGANIZATION_TYPES } from "@/lib/types";
+import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
 import { motion } from "motion/react";
 
 export default function SignInPage() {
@@ -589,18 +590,8 @@ export default function SignInPage() {
                   />
                 </div>
 
-                {/* Password strength bar */}
-                <div className="space-y-1 pt-0.5">
-                  <div className="flex space-x-1.5 h-1.5 w-full">
-                    <div className="w-1/4 h-full rounded-full bg-amber-400" />
-                    <div className="w-1/4 h-full rounded-full bg-neutral-200" />
-                    <div className="w-1/4 h-full rounded-full bg-neutral-200" />
-                    <div className="w-1/4 h-full rounded-full bg-neutral-200" />
-                  </div>
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-neutral-500">
-                    12 CHARACTERS OR MORE
-                  </span>
-                </div>
+                {/* Password strength bar dynamically connected to setPassword */}
+                <PasswordStrengthIndicator password={setPassword} />
 
                 {/* Create Org Button */}
                 <button

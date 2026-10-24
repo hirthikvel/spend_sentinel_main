@@ -205,7 +205,7 @@ export default function SpendSentinelDashboard() {
             availableEnvironments={dashboardData.availableEnvironments}
           />
 
-          {/* Row 2: Four KPI Cards */}
+          {/* Row 2: Three KPI Cards (Evenly Spaced Across Full Width) */}
           <KpiCardsRow
             kpis={dashboardData.kpis}
             periodDays={daysNumber}

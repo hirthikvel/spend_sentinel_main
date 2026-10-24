@@ -113,17 +113,10 @@ export function KpiCardsRow({
       pillType: "outline",
       sparklinePath: "M 2 15 Q 12 15 20 12 T 34 8 T 46 14 T 66 12",
     },
-    {
-      caption: "MONTHLY SAVING",
-      value: currentKpis.monthlySavingTotal,
-      pillText: currentKpis.monthlySavingPill,
-      pillType: "rose",
-      sparklinePath: "M 2 13 Q 12 8 22 13 T 38 7 T 52 13 T 66 9",
-    },
   ];
 
   return (
-    <div className="grid grid-cols-4 gap-2.5 2xl:gap-3">
+    <div className="grid grid-cols-3 gap-2.5 2xl:gap-3 w-full">
       {cards.map((card, idx) => (
         <KpiCard
           key={card.caption}
