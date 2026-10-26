@@ -154,10 +154,6 @@ export async function fetchFilterOptionsFromSupabase(): Promise<{
 }
 
 /**
- * Fetch Anomalies from your existing Supabase database
- * Maps from existing `anomaly_feed` view or `anomalies` joined with `verdicts`
- * Converted to Indian Rupees (INR ₹) with recognized dates
-/**
  * Scans billing_line_items in Supabase for spikes against 90-day baselines,
  * and automatically records discovered anomalies and verdicts in the DB!
  */
@@ -659,6 +655,7 @@ export async function signUpWithSupabase(params: {
         organization_name: params.orgName,
         organization_type: params.orgType || "b2b_saas",
       },
+      emailRedirectTo: 'https://spendsentinelmain.vercel.app/dashboard',
     },
   });
 
